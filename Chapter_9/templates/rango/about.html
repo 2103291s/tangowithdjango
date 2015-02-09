@@ -1,18 +1,12 @@
-<!DOCTYPE html>
+{% extends 'rango/base.html' %}
 
 {% load staticfiles %}
 
-<html>
+{% block title %}About{% endblock %}
 
-    <head>
-        <title>About</title>
-    </head>
-
-    <body>
-        <h1>Yiting Shen</h1>
-        hello world! <strong>{{ boldmessage }}</strong><br />
-        <a href="/rango/">Index</a><br />
-        <img src="{% static "images/rango2.jpg" %}" alt="Picture of Rango2" />
-    </body>
-
-</html>
+{% block body_block %}
+    <h1>Yiting Shen</h1>
+    hello world! <strong>{{ boldmessage }}</strong><br />
+    <li><a href="{% url 'index' %}">Return to the homepage.</a></li><br />
+    <img src="{% static "images/rango2.jpg" %}" alt="Picture of Rango2" />
+{% endblock %}

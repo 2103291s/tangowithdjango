@@ -1,0 +1,12 @@
+{% extends 'rango/base.html' %}
+
+{% load staticfiles %}
+
+{% block title %}About{% endblock %}
+
+{% block body_block %}
+    <h1>Yiting Shen</h1>
+    Hello World! <strong>{{ boldmessage }}</strong><br />
+	<p> visits: {{ visits }}</p>
+    <img src="{% static "images/rango2.jpg" %}" alt="Picture of Rango2" />
+{% endblock %}

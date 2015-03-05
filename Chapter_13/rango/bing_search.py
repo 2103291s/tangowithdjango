@@ -68,7 +68,12 @@ def run_query(search_terms):
 def main():
     query = raw_input("Please enter a query:")
     results = run_query(query)
-    print results
+    index=0
+    while index<len(results):
+        print "rank: " + str(index+1)
+        print "title: " + results[index]['title']
+        print "url: " + results[index]['link']
+        index+=1
 
 if __name__ == '__main__':
     main()

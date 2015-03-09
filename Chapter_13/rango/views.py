@@ -1,7 +1,7 @@
 # Import the Category model
 from rango.models import Category
 from rango.models import Page
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from rango.forms import CategoryForm
 from rango.forms import PageForm
@@ -71,35 +71,35 @@ def about(request):
     return render(request, 'rango/about.html', context_dict)
 
 def category(request, category_name_slug):
-
-    # Create a context dictionary which we can pass to the template rendering engine.
     context_dict = {}
+    context_dict['result_list'] = None
+    context_dict['query'] = None
+    if request.method == 'POST':
+        query = request.POST['query'].strip()
+
+        if query:
+            # Run our Bing function to get the results list!
+            result_list = run_query(query)
+
+            context_dict['result_list'] = result_list
+            context_dict['query'] = query
 
     try:
-        # Can we find a category name slug with the given name?
-        # If we can't, the .get() method raises a DoesNotExist exception.
-        # So the .get() method returns one model instance or raises an exception.
         category = Category.objects.get(slug=category_name_slug)
         context_dict['category_name'] = category.name
-
-        # Retrieve all of the associated pages.
-        # Note that filter returns >= 1 model instance.
-        pages = Page.objects.filter(category=category)
-
-        # Adds our results list to the template context under name pages.
+        pages = Page.objects.filter(category=category).order_by('-views')
         context_dict['pages'] = pages
-        # We also add the category object from the database to the context dictionary.
-        # We'll use this in the template to verify that the category exists.
         context_dict['category'] = category
     except Category.DoesNotExist:
-        # We get here if we didn't find the specified category.
-        # Don't do anything - the template displays the "no category" message for us.
         pass
 
-    # Go render the response and return it to the client.
+    if not context_dict['query']:
+        context_dict['query'] = category.name
+
     return render(request, 'rango/category.html', context_dict)
 
 
+@login_required
 def add_category(request):
     # A HTTP POST?
     if request.method == 'POST':
@@ -125,6 +125,7 @@ def add_category(request):
     return render(request, 'rango/add_category.html', {'form': form})
 
 
+@login_required
 def add_page(request, category_name_slug):
 
     try:
@@ -164,6 +165,54 @@ def search(request):
 
     return render(request, 'rango/search.html', {'result_list': result_list})
 
+def track_url(request):
+    page_id = None
+    url = '/rango/'
+    if request.method == 'GET':
+        if 'page_id' in request.GET:
+            page_id = request.GET['page_id']
+            try:
+                page = Page.objects.get(id=page_id)
+                page.views = page.views + 1
+                page.save()
+                url = page.url
+            except:
+                pass
+
+    return redirect(url)
+
+@login_required
+def register_profile(request):
+    if request.method == 'POST':
+        profile_form = UserProfileForm(request.POST)
+        if profile_form.is_valid():
+            if request.user.is_authenticated():
+                profile = profile_form.save(commit=False)
+                user = User.objects.get(id=request.user.id)
+                profile.user = user
+                try:
+                    profile.picture = request.FILES['picture']
+                except:
+                    pass
+                profile.save()
+                return index(request)
+    else:
+        form = UserProfileForm(request.GET)
+    return render(request, 'rango/profile_registration.html', {'profile_form': form})
+
+@login_required
+def profile(request):
+    u = User.objects.get(username=request.user.username)
+    context_dict = {}
+
+    try:
+        up = UserProfile.objects.get(user=u)
+    except:
+        up = None
+
+    context_dict['user'] = u
+    context_dict['userprofile'] = up
+    return render(request, 'rango/profile.html', context_dict)
 
 
 ##def register(request):
@@ -275,11 +324,11 @@ def restricted(request):
     return render(request, 'rango/restricted.html')
     return HttpResponse("Since you're logged in, you can see this text! You are at the restricted page!")
 
-### Use the login_required() decorator to ensure only those logged in can access the view.
-@login_required
-def user_logout(request):
-    # Since we know the user is logged in, we can now just log them out.
-    logout(request)
-
-    # Take the user back to the homepage.
-    return HttpResponseRedirect('/rango/')
+##### Use the login_required() decorator to ensure only those logged in can access the view.
+##@login_required
+##def user_logout(request):
+##    # Since we know the user is logged in, we can now just log them out.
+##    logout(request)
+##
+##    # Take the user back to the homepage.
+##    return HttpResponseRedirect('/rango/')

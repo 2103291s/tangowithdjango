@@ -30,7 +30,7 @@
 	{% else %}
 		The specified category {{ category_name }} does not exist!
 	{% endif %}
-  {% if user.authenticated %}
+  {% if user.is_authenticated %}
 	<div class="page-header">
         <h1>Search with Rango</h1>
     </div>

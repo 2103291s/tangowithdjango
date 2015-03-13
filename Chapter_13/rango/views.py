@@ -55,11 +55,13 @@ def about(request):
     context_dict = {'boldmessage': "This tutorial has been put together by Yiting Shen, 2103291s"}
 
     # If the visits session varible exists, take it and use it.
-    # If it doesn't, we haven't visited the site so set the count to zero.
     if request.session.get('visits'):
         count = request.session.get('visits')
+    if count:
+	    count = count + 1
     else:
-        count = 0
+	    count = 1
+    request.session['visits'] = count
         
     # Return a rendered response to send to the client.
     # We make use of the shortcut function to make our lives easier.

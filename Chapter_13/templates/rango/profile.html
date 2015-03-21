@@ -13,12 +13,12 @@
 	
 	<p>Username: {{ user.username }}</p>
 	<p>Email: {{ user.email }}</p>
-	{% if userprofile.website %}
-		<p>Website: <a href="{{ userprofile.website }}">{{ userprofile.website }}</a></p>
+	{% if user.userprofile.website %}
+		<p>Website: <a href="{{ user.userprofile.website }}">{{ userprofile.website }}</a></p>
 	{% endif %}
     <br/>
-    {% if userprofile.picture %}
-            <img src="{{ userprofile.picture.url }}"  />
+    {% if user.userprofile.picture %}
+            <img src="{{ user.userprofile.picture.url }}"  />
     {% endif %}
         
 
